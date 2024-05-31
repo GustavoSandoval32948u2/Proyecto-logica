@@ -1,17 +1,24 @@
 <!DOCTYPE html>
-<html lang="es">
-
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="Autor" content="Gustavo">
-    <meta name="Descripcion" content="Juego de cartas para adivinar">
-    <meta name="keywords" content="juego, azar, cartas, adivinar, Memoria">
     <title>Juego de Memoria</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="game-board" class="game-board"></div>
+    <div id="game-container">
+        <div id="header">
+            <h1>Juego de Memoria</h1>
+            <div id="level-info"></div>
+            <div>Puntuación: <span id="score">0</span></div>
+        </div>
+        <div id="game-board"></div>
+        <div id="message-container"></div>
+        <button id="retry-button" style="display:none;">Reintentar</button>
+        <button id="prev-level-button" style="display:none;">Nivel Anterior</button>
+        <button id="next-level-button">Siguiente Nivel</button>
+    </div>
     <script src="scripts.js"></script>
 </body>
 </html>
