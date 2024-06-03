@@ -1,13 +1,16 @@
 let firstClick = false;
 let score = 0;
 let level = 1;
-let totalPairs = 4;
+let totalPairs = 6; // Fácil
 const basePointsPerPair = 100;
 let pointsPerPair = basePointsPerPair / totalPairs;
 let firstCard = null;
 let secondCard = null;
 let lockBoard = false;
 let flipSpeed = 500; // Velocidad de volteo en milisegundos
+let timer = null;
+let startTime = null;
+let lives = 10;
 
 document.addEventListener("DOMContentLoaded", () => {
     const gameBoard = document.getElementById("game-board");
@@ -16,22 +19,29 @@ document.addEventListener("DOMContentLoaded", () => {
     const retryButton = document.getElementById("retry-button");
     const prevLevelButton = document.getElementById("prev-level-button");
     const nextLevelButton = document.getElementById("next-level-button");
+    const startButton = document.getElementById("start-button");
     const levelInfo = document.getElementById("level-info");
+    const timeContainer = document.getElementById("time");
+    const livesContainer = document.getElementById("lives");
 
     levelInfo.innerText = `Nivel: ${getLevelName(level)}`;
 
     createBoard();
 
+    startButton.addEventListener("click", () => {
+        revealAllCards();
+        setTimeout(() => {
+            hideAllCards();
+            startGameTimer();
+            startButton.style.display = 'none';
+        }, 1000);
+    });
+
     gameBoard.addEventListener("click", (event) => {
-        if (lockBoard) return;
+        if (lockBoard || startButton.style.display !== 'none') return;
         const clickedCard = event.target.closest('.card');
 
         if (!clickedCard || clickedCard.classList.contains('flipped')) return;
-
-        if (!firstClick) {
-            startGameTimer();
-            firstClick = true;
-        }
 
         flipCard(clickedCard);
 
@@ -62,23 +72,48 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     function startGameTimer() {
-        // Iniciar el contador...
+        startTime = new Date();
+        timer = setInterval(updateTimer, 1000);
+    }
+
+    function stopGameTimer() {
+        clearInterval(timer);
+        timer = null;
+    }
+
+    function updateTimer() {
+        const now = new Date();
+        const elapsedTime = Math.floor((now - startTime) / 1000);
+        timeContainer.innerText = `Tiempo: ${elapsedTime}s`;
     }
 
     function endGame() {
         messageContainer.innerHTML = '<h2>¡Felicitaciones! Has completado el nivel.</h2>';
         retryButton.style.display = "block";
+        stopGameTimer();
+    }
+
+    function loseGame() {
+        messageContainer.innerHTML = '<h2 class="lose">¡Has perdido! Inténtalo de nuevo.</h2>';
+        messageContainer.classList.add('lose'); // Cambio el color a rojo
+        retryButton.style.display = "block";
+        stopGameTimer();
     }
 
     function resetGame() {
         score = 0;
-        scoreContainer.innerText = score;
+        lives = getInitialLives(level);
+        scoreContainer.innerText = `Puntuación: ${score}`;
+        livesContainer.innerText = `Vidas: ${lives}`;
         messageContainer.innerHTML = '';
         retryButton.style.display = "none";
+        startButton.style.display = "block";
         firstClick = false;
         firstCard = null;
         secondCard = null;
         lockBoard = false;
+        stopGameTimer();
+        timeContainer.innerText = '';
         createBoard(); // Crear nuevamente el tablero
     }
 
@@ -91,13 +126,13 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateLevelSettings() {
         switch (level) {
             case 1:
-                totalPairs = 4; // Fácil
+                totalPairs = 6; // Fácil
                 break;
             case 2:
-                totalPairs = 6; // Medio
+                totalPairs = 8; // Medio
                 break;
             case 3:
-                totalPairs = 8; // Difícil
+                totalPairs = 8; // Difícil (Reducido de 10 a 8 pares)
                 break;
         }
         pointsPerPair = basePointsPerPair / totalPairs;
@@ -116,6 +151,17 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    function getInitialLives(level) {
+        switch (level) {
+            case 1:
+                return 10;
+            case 2:
+                return 12;
+            case 3:
+                return 14;
+        }
+    }
+
     function createBoard() {
         gameBoard.innerHTML = ''; // Limpiar el tablero
         const cardValues = generateCardValues(totalPairs);
@@ -128,62 +174,111 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             gameBoard.appendChild(card);
         });
-        gameBoard.style.gridTemplateColumns = `repeat(${Math.ceil(Math.sqrt(totalPairs * 2))}, 100px)`;
+        const columns = (level === 3) ? totalPairs * 2 : Math.ceil(Math.sqrt(totalPairs * 2));
+        gameBoard.style.gridTemplateColumns = `repeat(${columns}, 50px)`;
     }
 
-    function generateCardValues(pairs) {
+    function revealAllCards() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => card.classList.add('flipped'));
+    }
+
+    function hideAllCards() {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => card.classList.remove('flipped'));
+    }
+
+    function generateCardValues(pairsCount) {
         const values = [];
-        const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        for (let i = 0; i < pairs; i++) {
-            const letter = letters[i % letters.length];
-            values.push(letter, letter); // Crear pares de letras
+        
+        for (let i = 0; i < pairsCount; i++) {
+            const letter1 = String.fromCharCode(65 + i);
+            const letter2 = String.fromCharCode(65 + i); // Mismo par de letras
+            
+            if (level === 1) {
+                values.push(letter1, letter2); // Crear pares de letras simples para nivel 1
+            } else if (level === 2 || level === 3) {
+                const combinedLetter = `${letter1}${letter2}`;
+                values.push(combinedLetter, combinedLetter); // Añadir la combinación y su par para nivel 2 y 3
+            }
         }
-        return shuffle(values);
-    }
-
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+        
+        if (level === 2) {
+            values.push("AB", "CD", "EF", "GH"); // Agregar combinaciones de letras para nivel 2
+        } else if (level === 3) {
+            for (let i = 0; i < pairsCount; i++) {
+                    const letter1 = String.fromCharCode(65 + i);
+                    const letter2 = String.fromCharCode(65 + i + 1);
+                    values.push(letter1, letter1, letter2, letter2); // Intercale pares de letras y pares de letras combinadas para nivel 3
+                }
+            }
+            
+            return shuffleArray(values);
         }
-        return array;
-    }
-
-    function flipCard(card) {
-        card.classList.add('flipped');
-    }
-
-    function checkForMatch() {
-        if (firstCard.querySelector('.back').textContent === secondCard.querySelector('.back').textContent) {
-            disableCards();
-            score += pointsPerPair;
-            scoreContainer.innerText = score;
-
-            if (score >= 100) {
+    
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+    
+        function flipCard(card) {
+            card.classList.add('flipped');
+        }
+    
+        function checkForMatch() {
+            if (firstCard.querySelector('.back').textContent === secondCard.querySelector('.back').textContent) {
+                disableCards();
+                incrementScore();
+                if (score >= 100) {
+                    endGame();
+                }
+            } else {
+                loseLife();
+                unflipCards();
+            }
+        }
+    
+        function disableCards() {
+            firstCard.removeEventListener('click', flipCard);
+            secondCard.removeEventListener('click', flipCard);
+            resetBoard();
+        }
+    
+        function incrementScore() {
+            const targetScore = 100; // Ajustado para sumar hasta 100 al encontrar todos los pares
+            const increment = targetScore / (totalPairs);
+            score = Math.min(score + increment, targetScore);
+            scoreContainer.innerText = `Puntuación: ${Math.round(score)}`;
+            if (score >= targetScore) {
                 endGame();
             }
-        } else {
-            unflipCards();
         }
-    }
-
-    function disableCards() {
-        firstCard.removeEventListener('click', flipCard);
-        secondCard.removeEventListener('click', flipCard);
-        resetBoard();
-    }
-
-    function unflipCards() {
-        lockBoard = true;
-        setTimeout(() => {
-            firstCard.classList.remove('flipped');
-            secondCard.classList.remove('flipped');
-            resetBoard();
-        }, flipSpeed); // Tiempo corto para mostrar la carta antes de voltearla
-    }
-
-    function resetBoard() {
-        [firstCard, secondCard] = [null, null];
-        lockBoard = false;
-    }
-});
+    
+        function loseLife() {
+            lives--;
+            livesContainer.innerText = `Vidas: ${lives}`;
+            if (lives <= 0) {
+                loseGame();
+            }
+        }
+    
+        function unflipCards() {
+            lockBoard = true;
+            setTimeout(() => {
+                firstCard.classList.remove('flipped');
+                secondCard.classList.remove('flipped');
+                resetBoard();
+            }, flipSpeed); // Tiempo corto para mostrar la carta antes de voltearla
+        }
+    
+        function resetBoard() {
+            [firstCard, secondCard] = [null, null];
+            lockBoard = false;
+        }
+    
+        resetGame();
+    });
+    
