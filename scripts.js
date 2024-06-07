@@ -18,7 +18,6 @@ const maxScore = 100;
 
 // Función que se ejecuta cuando el documento HTML ha sido completamente cargado
 document.addEventListener("DOMContentLoaded", () => {
-    // Obtener elementos del DOM
     const gameBoard = document.getElementById("game-board");
     const scoreContainer = document.getElementById("score");
     const messageContainer = document.getElementById("message-container");
