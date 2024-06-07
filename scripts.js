@@ -13,6 +13,9 @@ let timer = null;
 let startTime = null;
 let lives = 10;
 
+// Constante para la puntuación máxima
+const maxScore = 100;
+
 // Función que se ejecuta cuando el documento HTML ha sido completamente cargado
 document.addEventListener("DOMContentLoaded", () => {
     // Obtener elementos del DOM
@@ -119,15 +122,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Generar pares de letras para cada nivel
         for (let i = 0; i < pairsCount; i++) {
-            const letter = alphabet[i % alphabet.length];
-            values.push(letter, letter);
-        }
-
-        // Si el nivel es 2 o 3, introducir letras combinadas
-        if (level >= 2) {
-            for (let i = 0; i < pairsCount; i++) {
+            if (level === 1 || (level === 2 && pairsCount === 6) || (level === 3 && i < pairsCount / 2)) {
+                const letter = alphabet[i % alphabet.length];
+                values.push(letter, letter);
+            } else if (level === 2 || (level === 3 && i >= pairsCount / 2)) {
                 const letter1 = alphabet[i % alphabet.length];
                 const letter2 = alphabet[(i + 1) % alphabet.length];
+               
                 values.push(letter1 + letter2, letter1 + letter2);
             }
         }
@@ -170,11 +171,15 @@ document.addEventListener("DOMContentLoaded", () => {
         resetBoard();
     }
 
-    // Función para incrementar la puntuación
+   // Función para incrementar la puntuación
     function incrementScore() {
-        score += pointsPerPair;
-        scoreContainer.innerText = `Puntuación: ${score}`;
+    score += pointsPerPair;
+    if (checkAllPairsMatched()) {
+        score = maxScore;
     }
+    scoreContainer.innerText = `Puntuación: ${score}`;
+    }
+
 
     // Función para verificar si se han encontrado todos los pares
     function checkAllPairsMatched() {
@@ -197,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
             firstCard.classList.remove('flipped');
             secondCard.classList.remove('flipped');
             resetBoard();
-        }, flipSpeed); // Tiempo corto para mostrar la carta antes de volte
+        }, flipSpeed); // Tiempo corto para mostrar la carta antes de voltear
     }
 
     // Función para reiniciar el tablero del juego
@@ -269,16 +274,16 @@ document.addEventListener("DOMContentLoaded", () => {
     function updateLevelSettings() {
         switch (level) {
             case 1:
-                totalPairs = 6; // Fácil
+                totalPairs = 8; // Fácil
                 break;
             case 2:
-                totalPairs = 4; // Medio
+                totalPairs = 12; // Medio
                 break;
             case 3:
-                totalPairs = 8; // Difícil (Reducido de 10 a 8 pares)
+                totalPairs = 16; // Difícil
                 break;
         }
-        pointsPerPair = Math.floor(basePointsPerPair / totalPairs);
+        pointsPerPair = Math.floor(basePointsPerPair / totalPairs); // Actualizamos los puntos por par
         flipSpeed = Math.max(100, 500 - (level - 1) * 50); // Incrementar la velocidad en cada nivel, hasta un mínimo de 100ms
         prevLevelButton.style.display = level > 1 ? "block" : "none";
     }
@@ -307,4 +312,3 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 });
-    
