@@ -32,7 +32,7 @@ body {
 #time, #score, #lives {
     font-size: 1.2em;
     margin-bottom: 5px;
-    color: #FFD700; /* Color dorado */
+    color: #FFD700; 
 }
 
 #game-board {
@@ -89,7 +89,7 @@ body {
 }
 
 #message-container.lose {
-    color: #ff0000; /* Cambio a rojo para el mensaje de pérdida */
+    color: #ff0000; 
 }
 
 
