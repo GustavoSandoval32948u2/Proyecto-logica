@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Crear el tablero del juego
     createBoard();
 
-    // Agregar event listener al botón de inicio
+    // event listener al botón de inicio
     startButton.addEventListener("click", () => {
         // Iniciar el juego
         revealAllCards();
@@ -47,13 +47,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1000);
     });
 
-    // Agregar event listener al botón de reintentar
+    // event listener al botón de reintentar
     retryButton.addEventListener("click", () => {
         // Reiniciar el juego
         resetGame();
     });
 
-    // Agregar event listener al botón de nivel anterior
+    // event listener al botón de nivel anterior
     prevLevelButton.addEventListener("click", () => {
         if (level > 1) {
             level--;
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // Agregar event listener al botón de siguiente nivel
+    // event listener al botón de siguiente nivel
     nextLevelButton.addEventListener("click", () => {
         if (level < 3) {
             level++;
@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
         return shuffleArray(values); // Barajar los valores
     }
 
-    // Función para barajar un array
+    // Función para barajar el array
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -202,7 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
             firstCard.classList.remove('flipped');
             secondCard.classList.remove('flipped');
             resetBoard();
-        }, flipSpeed); // Tiempo corto para mostrar la carta antes de voltear
+        }, flipSpeed); 
     }
 
     // Función para reiniciar el tablero del juego
@@ -270,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
         resetGame();
     }
     
-    // Función para actualizar la configuración del nivel
+    // Función para actualizar la configuración del numero de cartas
     function updateLevelSettings() {
         switch (level) {
             case 1:
